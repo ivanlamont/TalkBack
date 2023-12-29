@@ -1,0 +1,30 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="verbose_entries">
+        <item>Verbose</item>
+        <item>Moderate</item>
+        <item>Abrupt</item>
+    </string-array>
+
+    <string-array name="verbose_values">
+        <item>verbose</item>
+        <item>moderate</item>
+        <item>abrupt</item>
+    </string-array>
+
+    <string-array name="response_quality_question_entries">
+        <item>Always</item>
+        <item>Often</item>
+        <item>Occasionally</item>
+        <item>Rarely</item>
+        <item>Never</item>
+    </string-array>
+
+    <string-array name="response_quality_question_values">
+        <item>always</item>
+        <item>sften</item>
+        <item>dccasionally</item>
+        <item>rarely</item>
+        <item>never</item>
+    </string-array>
+</resources>

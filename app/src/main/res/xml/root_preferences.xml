@@ -1,0 +1,35 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/model_file_title">
+
+        <EditTextPreference
+            app:key="model"
+            app:title="@string/model_file_title"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/response_quality_question_header">
+        <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/response_quality_question_entries"
+            app:entryValues="@array/response_quality_question_values"
+            app:key="reply"
+            app:title="@string/response_quality_question_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/verbosity_header">
+
+        <ListPreference
+            app:defaultValue="verbose"
+            app:entries="@array/verbose_entries"
+            app:entryValues="@array/verbose_values"
+            app:key="verbose"
+            app:title="@string/verbosity_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/MainDisplay">
+
+    <fragment
+        android:id="@+id/MainDisplay"
+        android:name="com.maltino.net.talkback.ConversationFragment"
+        android:label="@string/first_fragment_label"
+        tools:layout="@layout/fragment_conversation">
+        <action
+            android:id="@+id/action_MainDisplay_to_placeholder"
+            app:destination="@id/placeholder" />
+    </fragment>
+    <fragment
+        android:id="@+id/placeholder"
+        android:name="com.maltino.net.talkback.SettingsActivity.SettingsFragment" />
+</navigation>
