@@ -12,10 +12,25 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
+        <TextView
+            android:id="@+id/textview_ContextFileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="200dp"
+            android:text="Context File"
+            app:layout_constraintStart_toEndOf="@+id/id_mic"
+            tools:layout_editor_absoluteY="43dp" />
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize" />
+
+        <Button
+            android:id="@+id/button_test"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            android:text="Test Location" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -28,6 +43,6 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:srcCompat="@android:drawable/ic_popup_sync" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

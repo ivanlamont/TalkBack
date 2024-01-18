@@ -21,6 +21,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException;
 
 public final class ObjectSerialization {
 
@@ -29,7 +30,8 @@ public final class ObjectSerialization {
     private String fileRoot;
 
     private ObjectSerialization() {
-        fileRoot =  Paths.get(Environment.getExternalStorageDirectory().toString(), "Documents").toString();
+        fileRoot = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+
         serializer = new GsonBuilder()
                 .registerTypeAdapter(Location.class, new LocationSerializer())
                 .registerTypeAdapter(Location.class, new LocationDeserializer())
@@ -66,14 +68,17 @@ public final class ObjectSerialization {
 
     }
 
-    public <T> T DeserializeFromFile(String filename, Type targetType)  {
+    public <T> T DeserializeFromFile(File jsonFile, Type targetType)  {
 
         T yoke = null;
         Reader f = null;
         try {
-            f = new FileReader(getFullFilePathFor(filename));
+            f = new FileReader(jsonFile);
             yoke = serializer.fromJson(f,  targetType);
             System.out.println("Bounced back with " );
+        } catch (JsonSyntaxException jsx) {
+            viewFile(jsonFile);
+            jsx.printStackTrace();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } finally {
@@ -81,6 +86,42 @@ public final class ObjectSerialization {
         }
 
         return yoke;
+    }
+
+    private void viewFile(File filename) {
+        InputStream fis = null;
+        try {
+            // open the file for reading
+            fis = new FileInputStream(filename);
+
+            // if file the available for reading
+            if (fis != null) {
+
+                // prepare the file for reading
+                InputStreamReader chapterReader = new InputStreamReader(fis);
+                BufferedReader buffreader = new BufferedReader(chapterReader);
+
+                String line;
+
+                // read every line of the file into the line-variable, on line at the time
+                do {
+                    line = buffreader.readLine();
+                    // do something with the line
+                    System.out.println(line);
+                } while (line != null);
+
+            }
+        } catch (Exception e) {
+            // print stack trace.
+        } finally {
+            // close the file.
+            try {
+                if (fis != null)
+                    fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private String getFullFilePathFor(String filename) {

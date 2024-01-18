@@ -32,8 +32,10 @@
             android:text="Location"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.025"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/id_mic" />
+            app:layout_constraintTop_toBottomOf="@+id/id_mic"
+            app:layout_constraintVertical_bias="1.0" />
 
         <TextView
             android:id="@+id/textview_Question"
@@ -45,5 +47,6 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/id_mic"
             app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

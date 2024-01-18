@@ -33,7 +33,9 @@ public class Locator {
     public TextView AddressText;
     public Location last_location;
 
-    public LocalAreaDescriptions LocationInfo;
+    //public LocalAreaDescriptions LocationInfo;
+
+    public CloudContextStore LocationContextManager;
     private static final int REQUEST_GPS_LOCATION = 2;
 
     public Locator(Context c, MainActivity parent) {
@@ -58,7 +60,7 @@ public class Locator {
                     .removeLocationUpdates(this);
 
             if (locationResult != null && locationResult.getLocations().size() >0){
-                handleLocationUpdate(locationResult.getLocations().get(locationResult.getLocations().size() - 1));
+                onLocationChanged(locationResult.getLocations().get(locationResult.getLocations().size() - 1));
             }
         }
     }
@@ -83,9 +85,9 @@ public class Locator {
         }
     }
 
-    private void handleLocationUpdate(Location latLng) {
+    public void onLocationChanged(Location latLng) {
         if (AddressText != null) {
-            LocationInfo.updateLocation(latLng, AddressText);
+            LocationContextManager.updateLocation(latLng, AddressText);
         }
     }
 

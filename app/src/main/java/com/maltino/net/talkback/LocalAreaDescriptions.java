@@ -2,6 +2,7 @@ package com.maltino.net.talkback;
 
 import android.location.Location;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -16,7 +17,7 @@ public class LocalAreaDescriptions implements Serializable {
     public transient String currentContext = "";
     public String Description = "";
 
-    public static String StorageFileName = "locationInfo.txt";
+//    public static String StorageFileName = "locationInfo.txt";
 
     public LocalAreaDescriptions(String dataSetDescription, List<PointOfInterest> data) {
         Description = dataSetDescription;
@@ -63,16 +64,34 @@ public class LocalAreaDescriptions implements Serializable {
     }
 
     public void updateLocation(Location latLng, TextView userInterface) {
-        String locationDescription = "No Context found, current location Latitude: "+ latLng.getLatitude() + "\n" + "Longitude: "+ latLng.getLongitude();
-        for(PointOfInterest c : Areas) {
-            if (c.isPointInPolygon(latLng)) {
-                if (currentSpot != c) {
-                    currentContext = c.getFullContextForMachineLearning();
-                    locationDescription = currentContext;
-                    userInterface.setText(locationDescription);
-                    currentSpot = c;
+        try {
+            for(PointOfInterest candidate : Areas) {
+                if (currentSpot != candidate) {
+                    if (candidate.isPointInPolygon(latLng)) {
+                        boolean makeChange = false;
+                        if (currentSpot != null && currentSpot.isPointInPolygon(latLng)) { // check to see if we are in both
+                            makeChange = currentSpot.Area > candidate.Area; // overlapping area might have more localized information... this isn't great but it's OK for a proof-of-concept
+                        } else {
+                            makeChange = true;
+                        }
+                        if (makeChange) {
+                            useNewLocationContextInformation(candidate, userInterface);
+                            break;
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            System.console().printf(e.getMessage());
+        }
+
+    }
+
+    private void useNewLocationContextInformation(PointOfInterest c, TextView userInterface) {
+        if (currentSpot != c) {
+            currentContext = c.getFullContextForMachineLearning();
+            userInterface.setText(currentContext);
+            currentSpot = c;
         }
     }
 
@@ -99,8 +118,9 @@ public class LocalAreaDescriptions implements Serializable {
         public String getFullContextForMachineLearning() {
             String locationDescription = Entries.keySet().stream()
                     .map(key -> Entries.get(key))
-                    .collect(Collectors.joining(".\n"));
-            return String.format("We are in %s.\n%s", Name, locationDescription);
+                    .collect(Collectors.joining(".\n"))
+                    .replace(".", ". ");
+            return String.format("We are currently at, or in, %s.\n%s", Name, locationDescription);
         }
 
         public boolean isPointInPolygon(Location testLocation) {

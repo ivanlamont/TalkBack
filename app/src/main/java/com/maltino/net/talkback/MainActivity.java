@@ -1,5 +1,8 @@
 package com.maltino.net.talkback;
 
+import static android.app.ProgressDialog.show;
+
+import android.location.Location;
 import android.os.Bundle;
 import android.app.Activity;
 
@@ -16,12 +19,16 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.maltino.net.talkback.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,27 +40,39 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private TextView localAreaInformation;
     private TextView userSpeechTranscription;
+    private TextView contextFileName;
     private ImageView microphonePushToTalk;
-    private LocalAreaDescriptions locationInfo;
+    private FloatingActionButton refreshButton;
     private Context context;
     private Locator gps;
     private VoiceListener ears;
     private Intelligence brain;
     private Speaker mouth;
     private Bundle memory;
+    private CloudContextStore cloud;
     private static final int REQUEST_CODE_SPEECH_INPUT = 1;
     private static final int REQUEST_GPS_LOCATION = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        memory = savedInstanceState;
-        prepareUserInterface();
-        prepareLocalContextData();
-        prepareLocation(localAreaInformation);
-        prepareEars(userSpeechTranscription);
-        prepareMouth();
-        prepareBrain();
+        try {
+            memory = savedInstanceState;
+            prepareUserInterface();
+            prepareCloud();
+            prepareLocation(localAreaInformation);
+            prepareEars(userSpeechTranscription);
+            prepareMouth();
+            prepareBrain();
+        } catch (Exception e) {
+            Toast.makeText(this.context, "Error Loading:" + e.getMessage(), Toast.LENGTH_LONG);
+        }
+
+    }
+
+    private void prepareCloud() {
+        cloud = new CloudContextStore(this, contextFileName);
+        cloud.setRefreshButton(refreshButton);
     }
 
     private void prepareUserInterface() {
@@ -73,13 +92,26 @@ public class MainActivity extends AppCompatActivity {
         microphonePushToTalk = findViewById(R.id.id_mic);
         userSpeechTranscription = findViewById(R.id.textview_Question);
         localAreaInformation = findViewById(R.id.textview_Location);
+        contextFileName = findViewById(R.id.textview_ContextFileName);
+        refreshButton = findViewById(R.id.fab);
+        Button testButton = findViewById(R.id.button_test);
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                android.location.Location testLocation = new Location("TEST");
+                testLocation.setLatitude(37.803);
+                testLocation.setLongitude(-122.45);
+                gps.onLocationChanged(testLocation);
+            }
+        });
+
     }
 
     private void prepareLocation(TextView userDisplay) {
         gps = new Locator(context,MainActivity.this);
         gps.Start();
         gps.AddressText = userDisplay;
-        gps.LocationInfo = locationInfo;
+        gps.LocationContextManager = cloud;
     }
 
     private void prepareEars(TextView userDisplay) {
@@ -90,23 +122,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void prepareMouth() {
         mouth = new Speaker(context, memory);
-    }
-
-    private void prepareLocalContextData() {
-
-        try {
-            locationInfo = ObjectSerialization.getInstance().DeserializeFromFile(LocalAreaDescriptions.StorageFileName, LocalAreaDescriptions.class);
-        } catch (Exception x) {
-            x.printStackTrace();
-        }
-        if (locationInfo == null || locationInfo.IsEmpty()) {
-            useTestLocalContextData();
-        }
-    }
-
-    private void useTestLocalContextData() {
-        locationInfo = LocalAreaDescriptions.getTestData();
-        ObjectSerialization.getInstance().SerializeToFile(locationInfo, LocalAreaDescriptions.StorageFileName);
     }
 
     private void prepareBrain() {
@@ -145,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK) {
                     String speech = getSpeechRecognitionResult(data);
                     userSpeechTranscription.setText(speech);
-                    askBert(locationInfo.currentContext, speech);
+                    askBert(cloud.CurrentContext(), speech);
                 }
                 break;
             case REQUEST_GPS_LOCATION:
