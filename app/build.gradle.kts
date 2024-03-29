@@ -12,8 +12,8 @@ android {
         applicationId = "com.maltino.net.talkback"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -51,6 +51,9 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite-gpu:2.14.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.preference:preference:1.2.0")
+    implementation("androidx.media3:media3-common:1.3.0")
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation("androidx.activity:activity:1.8.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

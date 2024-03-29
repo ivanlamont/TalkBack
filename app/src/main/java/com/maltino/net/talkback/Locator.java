@@ -32,8 +32,7 @@ public class Locator {
     private Activity appActivity;
     public TextView AddressText;
     public Location last_location;
-
-    //public LocalAreaDescriptions LocationInfo;
+    private LocationResponseHandler callback;
 
     public CloudContextStore LocationContextManager;
     private static final int REQUEST_GPS_LOCATION = 2;
@@ -44,20 +43,30 @@ public class Locator {
     }
     private LocationRequest locationRequest;
     public void Start() {
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(2000);
-        getCurrentLocation();
+        if (callback == null) {
+            locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setInterval(5000);
+            locationRequest.setFastestInterval(2000);
+            getCurrentLocation();
+        }
     }
+    public void Stop() {
+        synchronized (this) {
+            if (callback != null) {
+                LocationServices
+                        .getFusedLocationProviderClient(appActivity)
+                        .removeLocationUpdates(callback);
+                callback = null;
+            }
+        }
+    }
+
     class LocationResponseHandler extends LocationCallback {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
 
-            LocationServices
-                    .getFusedLocationProviderClient(appActivity)
-                    .removeLocationUpdates(this);
 
             if (locationResult != null && locationResult.getLocations().size() >0){
                 onLocationChanged(locationResult.getLocations().get(locationResult.getLocations().size() - 1));
@@ -71,9 +80,11 @@ public class Locator {
             if (ActivityCompat.checkSelfPermission(appActivity, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                 if (isGPSEnabled()) {
-
-                    LocationServices.getFusedLocationProviderClient(appActivity)
-                            .requestLocationUpdates(locationRequest, new LocationResponseHandler(), Looper.getMainLooper());
+                    synchronized (this) {
+                        callback = new LocationResponseHandler();
+                        LocationServices.getFusedLocationProviderClient(appActivity)
+                                .requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
+                    }
 
                 } else {
                     turnOnGPS();

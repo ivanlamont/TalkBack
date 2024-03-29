@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 
@@ -32,7 +33,7 @@ public class CloudContextStore {
     private String contextFileFolder = "/storage/emulated/0/Android/data/com.maltino.net.talkback/files/Download";
     private String contextFileName = "bert_context_novato.json";
     private String cloud_URL_Scheme = "https";
-    private String cloud_URL_Server = "9abemzvla6.execute-api.us-east-1.amazonaws.com";
+    private String cloud_URL_Server = "9abemzvla6.execute-api.us-east-1.amazonaws.com"; //AWS API Gateway - Resources - GoCarAIChatContext (9abemzvla6)
     private String cloud_URL_Stage = "gocar-ai-beta";
     private String cloud_URL_Folder = "gocar-ai";
     private String cloud_URL_FileName = "bert_context_novato.json";
@@ -44,12 +45,36 @@ public class CloudContextStore {
     private String JSON_FILE = "JSON-FILE";
 
     public CloudContextStore(MainActivity parent, TextView fileNameDisplay) {
-        appActivity = parent;
-        fileDisplay = fileNameDisplay;
-        sharedPref = appActivity.getPreferences(Context.MODE_PRIVATE);
-        contextFileName = getLastSuccessfulFileName();
-        File stored = new File(contextFileFolder + "/" + contextFileName);
-        prepareLocalContextData(stored);
+        try {
+            appActivity = parent;
+            fileDisplay = fileNameDisplay;
+            sharedPref = appActivity.getPreferences(Context.MODE_PRIVATE);
+            contextFileName = getLastSuccessfulFileName();
+            File stored = new File(contextFileFolder + "/" + contextFileName);
+            if (!stored.exists()) {
+                stored = getBestGuessJson(contextFileFolder);
+            }
+            prepareLocalContextData(stored);
+        } catch (Exception e) {
+            Toast
+                    .makeText(appActivity, "Creating cloud engine failed: " + e.getMessage(), Toast.LENGTH_SHORT)
+                    .show();
+        }
+    }
+
+    private File getBestGuessJson(String path) {
+
+        File s = new File(path);
+        File[] jsons = new File(path).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("json");
+            }
+        });
+        if (jsons != null && jsons.length > 0)
+            return jsons[0];
+        else
+            return null;
     }
 
     public void setRefreshButton(FloatingActionButton refreshButton) {
@@ -143,7 +168,10 @@ public class CloudContextStore {
     };
 
     public String CurrentContext() {
-        return locationInfo.currentContext;
+        if (locationInfo != null)
+            return locationInfo.currentContext;
+        else
+            return "";
     }
 
     public void updateLocation(Location latLng, TextView userInterface) {
