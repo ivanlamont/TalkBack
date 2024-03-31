@@ -52,7 +52,9 @@ public class CloudContextStore {
             contextFileName = getLastSuccessfulFileName();
             File stored = new File(contextFileFolder + "/" + contextFileName);
             if (!stored.exists()) {
-                stored = getBestGuessJson(contextFileFolder);
+                File alternative = getBestGuessJson(contextFileFolder);
+                if (alternative != null)
+                    stored = alternative;
             }
             prepareLocalContextData(stored);
         } catch (Exception e) {
@@ -187,12 +189,14 @@ public class CloudContextStore {
 
     private void prepareLocalContextData(File jsonfile, boolean useTestIfNotFound) {
         LocalAreaDescriptions newContextInfo = null;
-        long len = jsonfile.length();
-        try {
-            newContextInfo = ObjectSerialization.getInstance().DeserializeFromFile(jsonfile, LocalAreaDescriptions.class);
-            setLastSuccessfulFileName(jsonfile.getName());
-        } catch (Exception x) {
-            x.printStackTrace();
+        if (jsonfile.exists()) {
+            long len = jsonfile.length();
+            try {
+                newContextInfo = ObjectSerialization.getInstance().DeserializeFromFile(jsonfile, LocalAreaDescriptions.class);
+                setLastSuccessfulFileName(jsonfile.getName());
+            } catch (Exception x) {
+                x.printStackTrace();
+            }
         }
         if (useTestIfNotFound && (newContextInfo == null || newContextInfo.IsEmpty())) {
             newContextInfo = useTestLocalContextData();
